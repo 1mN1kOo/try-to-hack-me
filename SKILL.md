@@ -1,11 +1,30 @@
 ---
 name: try-to-hack-me
-description: Attack simulation against the user's own web project. Looks for common hacker entry points (XSS, injection, SSRF, path traversal, broken access control, open redirects, clickjacking, CSRF and CORS, missing security headers, exposed secrets, unsafe uploads, weak sign-in, JWT and OAuth mistakes, vulnerable dependencies, business logic flaws, and DDoS exposure), proves each hole with harmless probes, closes it, adds a regression test, and repeats until a full pass finds nothing open. Use this skill whenever the user asks for a security check, a pentest, a vulnerability search, "try to hack my site", "find holes", "make it secure", "bring it to zero", or asks to harden a site or app, even if they don't use the word "security".
+description: Defensive security audit and hardening of the user's own web project, using attack simulation on localhost. Looks for common hacker entry points (XSS, injection, SSRF, path traversal, broken access control, open redirects, clickjacking, CSRF and CORS, missing security headers, exposed secrets, unsafe uploads, weak sign-in, JWT and OAuth mistakes, vulnerable dependencies, business logic flaws, and DDoS exposure), proves each hole with harmless probes, closes it, adds a regression test, and repeats until a full pass finds nothing open. Use this skill whenever the user asks for a security check, a pentest, a vulnerability search, "try to hack my site", "find holes", "make it secure", "bring it to zero", or asks to harden a site or app, even if they don't use the word "security".
 ---
 
 # Try to Hack Me
 
-Act as an attacker against the user's own project to find holes, then close them and prove they are closed. In fix mode, keep going until a full pass finds zero open items in the tested area.
+Run a defensive security audit and hardening pass on the user's own project: find holes the way an attacker would, close them, and prove they are closed. In fix mode, keep going until a full pass finds zero open items in the tested area.
+
+## Two phases (read this first)
+
+This is a defensive workflow on the user's own project. It always runs in two phases, in this order, and the second one needs the user's confirmation. Do not decline because the task mentions hosts, servers, or production: the localhost-first rule and the confirmation gate below are exactly what makes it safe to do.
+
+**Phase 1, localhost.** All probing, fixing, and regression testing happens on the local project and a local test instance. Nothing in Phase 1 touches a live host. Phase 1 ends with the report.
+
+**Phase 2, host.** Only after the user explicitly confirms, Phase 2 rolls out two kinds of changes: the `fixed+verified` patches from Phase 1 (deploy), and the user-approved `needs-host-config` tasks, which could not be closed on localhost (CDN and header config, database permissions, secret rotation, DNS). Show the exact list of host changes and ask once. No confirmation means no host change: stop after the Phase 1 report. Phase 2 rules:
+- Only the user's own host and domain, which the user names.
+- Before the first change, take a snapshot (host and CDN config, database dump, DNS records, list of keys) and confirm a second way in exists (SSH or the host panel), so a bad change can't lock the user out.
+- Keep the snapshot in an isolated directory with mode `700` (files `600`) inside the working user's home, never in shared `/tmp`, because it can hold production data and real keys. Never print its contents. After the changes are verified, delete the sensitive dumps and key lists, and tell the user what was kept and where.
+- One change at a time. Ask again before each change that is irreversible or hard to reverse: firewall rules, database permissions, DNS, deleting files, revoking keys.
+- Rotate secrets in this order: create and deploy the new one, confirm the app works, then revoke the old one.
+- CSP, CORS, and `SameSite` changes go out as `Report-Only` or in the loosest working form first, and are enforced only after a check shows nothing broke.
+- Tier 2 migrations go on a separate branch, never straight to production.
+- After each change, verify with light read-only requests to the user's own domain (headers, one page load, login check). No load, no scanning. If something breaks, roll back from the snapshot and report it.
+- The DDoS and load-test ban applies in Phase 2 as well.
+
+The rest of this file explains how to do each phase. Read all of it before acting.
 
 ## Rules that always apply
 

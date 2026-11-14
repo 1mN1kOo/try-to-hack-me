@@ -39,13 +39,16 @@ Tested on **Mollra Music** (full-stack web app on localhost):
 
 ---
 
-## 🔁 How it Works (Loop-to-Zero)
+## 🔁 How it Works (Two-Phase Hardening)
 
-1. **Map & Scan:** Discovers inputs, sinks, and routes; integrates tools (`semgrep`, `gitleaks`, `npm audit`).
-2. **Harmless Probes:** Sends benign test markers (e.g. `window.__xss=1`, max 15 requests, localhost only). Confirms XSS execution via headless browser.
-3. **Patch & Regression Test:** Implements minimal fixes and writes automated tests into `security.test.js`.
-4. **Iterate (Up to 5 passes):** Re-scans the full project to catch secondary regressions until reaching clean status.
-5. **Clean Hygiene:** Automatically purges all test data and verifies with `git status`.
+- **Phase 1 (Localhost Loop-to-Zero):**  
+  1. **Map & Scan:** Discovers inputs, sinks, routes; runs defensive tools (`semgrep`, `gitleaks`, `npm audit`).
+  2. **Harmless Probes:** Sends benign test markers (e.g. `window.__xss=1`, max 15 requests, localhost only).
+  3. **Patch & Test:** Implements minimal fixes and writes regression tests into `security.test.js`.
+  4. **Iterate (Up to 5 passes):** Re-scans the full codebase until reaching clean status (**0 open in tested area**).
+  5. **Clean Hygiene:** Purges test data and verifies with `git status`.
+- **Phase 2 (Host Rollout — User Confirmation Gate):**  
+  Optional, strictly gated deployment of verified patches and `needs-host-config` tasks (CDN, headers, secret rotation) with snapshots, individual confirmations, and instant rollback.
 
 ---
 
