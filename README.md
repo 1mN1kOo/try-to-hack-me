@@ -12,7 +12,7 @@
 
 ## 📊 Benchmark & Test Results
 
-![Audit Results](audit_results.png)
+![Benchmark Results](benchmark.png)
 
 ---
 
