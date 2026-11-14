@@ -36,6 +36,10 @@ The skill systematically checks for common security weaknesses:
 - **File Upload Vulnerabilities**: Missing server-side MIME/extension verification, same-origin SVG/HTML execution.
 - **Prototype Pollution**: Unsafe object merges and deep copies.
 - **Vulnerable Dependencies**: `npm audit` / dependency vulnerability triage.
+- **Business Logic Flaws & Race Conditions**: Multi-step state machine bypasses, coupon/invite code double-use, negative quantities, atomic database transactions for concurrent actions.
+- **ReDoS (Regular Expression Denial of Service)**: Detection of nested quantifiers and catastrophic backtracking patterns with input bounds.
+- **Formula & Export Injection**: Protection against CSV/spreadsheet formula execution (`=`, `+`, `-`, `@`) and server-side template injection.
+- **User Enumeration Prevention**: Unified response shapes and timings across login, password reset, and registration endpoints.
 - **DDoS Readiness Review (Audit Only)**: Configuration assessment of CDN proxying, origin IP exposure, edge rate limiting, WAF/bot challenge setups, response caching, body size bounds, and third-party quota guards (strictly reviewed, never simulated).
 
 ---
@@ -58,9 +62,11 @@ The skill adapts automatically to how you phrase your prompt:
 - **Audit Mode** (Default):
   - *Triggered by:* "check", "test", "audit", "find vulnerabilities", "try to hack my site".
   - Inspects code, runs harmless probes, maps data sinks, and outputs a structured findings report without touching your code.
-- **Fix Mode**:
-  - *Triggered by:* "fix holes", "harden", "secure my app", "close vulnerabilities".
-  - Implements the minimal safe patch for each verified hole, re-tests with the same probe to verify closure, and confirms no regressions.
+- **Fix Mode** (Looping to Zero):
+  - *Triggered by:* "fix holes", "harden", "secure my app", "close vulnerabilities", "bring it to zero".
+  - Implements the minimal safe patch for each verified hole and writes automated regression tests into the project's test suite.
+  - Loops across the full project (up to 5 passes) until a complete scan yields **0 open** findings in the tested area.
+  - Maintains a strict findings registry: `open`, `fixed+verified`, `needs-host-config`, and `untestable`.
 
 ---
 
