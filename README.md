@@ -10,6 +10,12 @@
 
 ---
 
+## 📊 Benchmark & Test Results
+
+![Audit Results](audit_results.png)
+
+---
+
 ## 🎯 What it Covers
 
 The skill systematically checks for common security weaknesses:
