@@ -22,18 +22,21 @@ The skill systematically checks for common security weaknesses:
 
 - **Cross-Site Scripting (XSS)**: Reflected, stored, and DOM-based vectors.
 - **Injections**: SQL, Command, CSS, HTML, and template injection.
+- **Unverified Webhooks & Callbacks**: Missing HMAC signature checks, replay attacks, timestamp verification, and idempotency.
 - **SSRF (Server-Side Request Forgery)**: Unsafe server-side URL fetches, internal IP / metadata protection (`169.254.169.254`, `localhost`, private CIDRs).
 - **Path Traversal & LFI**: File access validation, traversal sequences (`../`, URL-encoded, null bytes).
-- **Broken Access Control**: Missing server-side authorization checks, IDOR, client-side permission spoofing.
+- **Broken Access Control, Mass Assignment & DB Leaks**: Missing server-side authorization, IDOR, raw body mass assignment, sensitive response field stripping, public database panels and dump protection.
 - **Unsafe URLs & Redirects**: Open redirects, dangerous URI schemes (`javascript:`, `data:`).
 - **Clickjacking & Framing**: Verification of CSP `frame-ancestors` and `X-Frame-Options`.
 - **CSRF & CORS Misconfigurations**: State-changing request validation, `SameSite` cookies, overly permissive `Access-Control-Allow-Origin: *`.
 - **Security Headers & Cookies**: Missing CSP, HSTS, `X-Content-Type-Options`, `HttpOnly`/`Secure`/`SameSite` attributes.
 - **Exposed Secrets & Files**: Committed `.env`, client-side leaked tokens, source maps in production, public `.git` directories.
-- **Authentication, JWT & OAuth**: Signature verification, algorithm confusion (`alg: none`), expiration checks, OAuth `state` and PKCE.
+- **Authentication, JWT & Account Takeover Protection**: Robust password hashing (Argon2id/bcrypt/PBKDF2), session invalidation on credential changes, cryptographically secure randomness, timing-safe equality, JWT algorithm allowlists, OAuth `state` and PKCE.
+- **WebSockets & Cross-Window Trust**: Strict `Origin` checks on WebSocket handshakes, per-message authorization, frame size bounds, and `postMessage` origin validation.
 - **File Upload Vulnerabilities**: Missing server-side MIME/extension verification, same-origin SVG/HTML execution.
 - **Prototype Pollution**: Unsafe object merges and deep copies.
 - **Vulnerable Dependencies**: `npm audit` / dependency vulnerability triage.
+- **DDoS Readiness Review (Audit Only)**: Configuration assessment of CDN proxying, origin IP exposure, edge rate limiting, WAF/bot challenge setups, response caching, body size bounds, and third-party quota guards (strictly reviewed, never simulated).
 
 ---
 
@@ -42,7 +45,7 @@ The skill systematically checks for common security weaknesses:
 Safety and ethical boundaries are enforced by design:
 - **Localhost and Local Code Only**: Probes run strictly against your local repository files or a local development server you started. Never probes remote third-party services or live production environments.
 - **Harmless Probes**: Uses harmless unique marker probes (such as `window.__xss=1`). Never uses destructive payloads, exploit kits, or scanners.
-- **No Brute-Forcing or DoS**: Zero high-rate flooding, brute-force attempts, or traffic spikes.
+- **No Brute-Forcing or DDoS Simulations**: Zero high-rate flooding, brute-force attempts, or traffic spikes. DDoS protection is evaluated strictly through architectural and configuration review, never through active load simulation.
 - **Automated Cleanup**: Any probe data written to local stores or databases during dynamic checks is tracked by marker and deleted immediately after the test.
 - **Privacy**: Does not read, leak, or export real credentials or user data found in the project.
 
